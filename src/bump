@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+NAT='0|[1-9][0-9]*'
+
+SEMVER_REGEX="^[vV]?($NAT)\\.($NAT)$"
+
+USAGE="\
+Usage:
+   bump.sh (major|minor) <version>"
+
+function error {
+  echo -e "$1" >&2
+  exit 1
+}
+
+function usage-help {
+  error "$USAGE"
+}
+
+function validate-version {
+  local version=$1
+  if [[ "$version" =~ $SEMVER_REGEX ]]; then
+    # if a second argument is passed, store the result in var named by $2
+    if [ "$#" -eq "2" ]; then
+      local major=${BASH_REMATCH[1]}
+      local minor=${BASH_REMATCH[2]}
+      eval "$2=(\"$major\" \"$minor\")"
+    else
+      echo "$version"
+    fi
+  else
+    error "version $version does not match with 'X.Y'."
+  fi
+}
+
+function command-bump {
+  local new; local version; local sub_version; local command;
+
+  command=$1; version=$2
+
+  validate-version "$version" parts
+  local major="${parts[0]}"
+  local minor="${parts[1]}"
+
+  case "$command" in
+    major) new="$((major + 1)).0";;
+    minor) new="${major}.$((minor + 1))";;
+    *) usage-help ;;
+  esac
+
+  echo "$new"
+  exit 0
+}
+
+case $1 in
+  --help|-h) echo -e "$USAGE"; exit 0;;
+  major|minor) command-bump "$@";;
+  *) echo "Unknown arguments: $*"; usage-help;;
+esac
