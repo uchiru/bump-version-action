@@ -45,7 +45,7 @@ fi
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
 if [ -z "$tag" ]
 then
-    log=$(git log --pretty='%B')
+    log=$(git log --pretty='%B' | head -1)
     tag="$initial_version"
 else
     log=$(git log $tag..HEAD --pretty='%B')
