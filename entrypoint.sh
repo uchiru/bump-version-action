@@ -1,4 +1,5 @@
 #!/bin/bash
+set -o pipefail
 
 # config
 default_semvar_bump=${DEFAULT_BUMP:-minor}
@@ -28,7 +29,12 @@ echo "pre_release = $pre_release"
 git fetch --tags
 
 # get latest tag that looks like a ver (with or without v)
-tag=$(git for-each-ref --sort=-v:refname --format '%(refname)' | grep -o "^refs/tags/v\?[0-9]\+\.[0-9]\+$" | head -1 | cut -d / -f 3- | tr -d 'v')
+tag=$(basename $(git for-each-ref --sort=-v:refname --format '%(refname)' | grep -o "^refs/tags/v\?[0-9]\+\.[0-9]\+$" | head -1))
+
+# trim 'v' if $with_v=false
+if ! $with_v; then
+  tag=$(echo $tag | tr -d 'v')
+fi
 
 # get current commit hash for tag
 tag_commit=$(git rev-list -n 1 $tag)
