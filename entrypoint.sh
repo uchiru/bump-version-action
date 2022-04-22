@@ -29,9 +29,9 @@ pre_release="true"
 IFS=',' read -ra branch <<< "$release_branches"
 for b in "${branch[@]}"; do
     echo "Is $b a match for ${current_branch}"
-    if [[ "${current_branch}" =~ $b ]]
-    then
+    if [[ "${current_branch}" =~ $b ]]; then
         pre_release="false"
+        continue
     fi
 done
 echo "pre_release = $pre_release"
@@ -60,8 +60,7 @@ if [ "$tag_commit" == "$commit" ]; then
 fi
 
 # if there are none, start tags at INITIAL_VERSION which defaults to 0.0.0
-if [ -z "$tag" ]
-then
+if [ -z "$tag" ]; then
     log=$(git log --pretty='%B' | head -1)
     tag="$initial_version"
 else
@@ -92,22 +91,18 @@ esac
 echo $part
 
 # did we get a new tag?
-if [ ! -z "$new" ]
-then
+if [ ! -z "$new" ]; then
     # prefix with 'v'
-    if $with_v
-    then
+    if $with_v; then
         new="v$new"
     fi
 
-    if $pre_release
-    then
+    if $pre_release; then
         new="$new-${commit:0:7}"
     fi
 fi
 
-if [ ! -z $custom_tag ]
-then
+if [ ! -z $custom_tag ]; then
     new="$custom_tag"
 fi
 
@@ -118,16 +113,14 @@ echo ::set-output name=new_tag::$new
 echo ::set-output name=part::$part
 
 # use dry run to determine the next tag
-if $dryrun
-then
+if $dryrun; then
     echo ::set-output name=tag::$tag
     exit 0
 fi 
 
 echo ::set-output name=tag::$new
 
-if $pre_release
-then
+if $pre_release; then
     echo "This branch is not a release branch. Skipping the tag creation."
     exit 0
 fi
